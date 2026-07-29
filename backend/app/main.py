@@ -101,7 +101,7 @@ def root():
 
 @app.get("/auth/google")
 async def google_login(request: Request):
-    redirect_uri = "http://localhost:8000/auth/google/callback"
+    redirect_uri = "https://prep-me-backend.onrender.com/auth/google/callback"
     return await oauth.google.authorize_redirect(
         request,
         redirect_uri
