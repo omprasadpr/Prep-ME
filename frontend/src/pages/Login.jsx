@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BrainCircuit, ArrowRight, Eye, EyeOff, MailWarning, RefreshCw } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
@@ -15,6 +15,18 @@ function Login() {
     const [resendMessage, setResendMessage] = useState(null);
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get("token");
+        const authError = params.get("error");
+        if (token) {
+            localStorage.setItem("token", token);
+            navigate("/dashboard");
+        } else if (authError) {
+            setError("Google authentication failed. Please try again.");
+        }
+    }, [navigate]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
