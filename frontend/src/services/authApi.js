@@ -10,6 +10,11 @@ export const registerUser = async (data) => {
     return response.data;
 };
 
+export const googleLoginUser = async (data) => {
+    const response = await api.post("/auth/google", data);
+    return response.data;
+};
+
 export const verifyEmailToken = async (token) => {
     const response = await api.get(`/auth/verify-email?token=${encodeURIComponent(token)}`);
     return response.data;

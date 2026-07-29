@@ -1,5 +1,8 @@
+# pyrefly: ignore [missing-import]
 from fastapi import APIRouter, Depends, Query
+# pyrefly: ignore [missing-import]
 from fastapi.security import OAuth2PasswordRequestForm
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -14,6 +17,7 @@ from app.schemas.auth_schema import (
     VerifyEmailTokenRequest,
     ResendVerificationRequest,
     MessageResponse,
+    GoogleLoginRequest,
 )
 
 from app.schemas.user_schema import UserResponse
@@ -23,6 +27,7 @@ from app.services.auth_service import (
     login_user,
     verify_email,
     resend_verification,
+    google_login_user,
 )
 
 router = APIRouter(
@@ -51,6 +56,17 @@ def login(
     db: Session = Depends(get_db),
 ):
     return login_user(user, db)
+
+
+@router.post(
+    "/google",
+    response_model=TokenResponse,
+)
+def google_login(
+    data: GoogleLoginRequest,
+    db: Session = Depends(get_db),
+):
+    return google_login_user(data, db)
 
 
 @router.get(

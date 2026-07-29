@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BrainCircuit, ArrowRight, Eye, EyeOff, MailWarning, RefreshCw } from "lucide-react";
-import { loginUser, resendVerificationEmail } from "../services/authApi";
+import { GoogleLogin } from "@react-oauth/google";
+import { loginUser, googleLoginUser, resendVerificationEmail } from "../services/authApi";
 
 function Login() {
     const [email, setEmail] = useState("");
@@ -35,6 +36,25 @@ function Login() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+        setError(null);
+        setUnverifiedEmail(null);
+        try {
+            setLoading(true);
+            const data = await googleLoginUser({ id_token: credentialResponse.credential });
+            localStorage.setItem("token", data.access_token);
+            navigate("/dashboard");
+        } catch (err) {
+            setError(err.response?.data?.detail || "Google Sign-In failed.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleError = () => {
+        setError("Google Sign-In was cancelled or failed.");
     };
 
     const handleResend = async () => {
@@ -122,6 +142,28 @@ function Login() {
                         </div>
                     )}
 
+                    {/* ── Google Sign-In ── */}
+                    <div className="mb-6 flex justify-center w-full">
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={handleGoogleError}
+                            useOneTap={false}
+                            theme="filled_black"
+                            shape="pill"
+                            text="continue_with"
+                            width="100%"
+                        />
+                    </div>
+
+                    <div className="relative my-6">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-white/[0.06]" />
+                        </div>
+                        <div className="relative flex justify-center">
+                            <span className="bg-[#0D1117] px-3 text-[10px] text-slate-500 font-bold uppercase tracking-wider">OR CONTINUE WITH EMAIL</span>
+                        </div>
+                    </div>
+
                     {/* Form */}
                     <form onSubmit={handleLogin} className="space-y-4">
                         <div>
@@ -192,7 +234,7 @@ function Login() {
 
                 {/* Bottom badge */}
                 <p className="text-center text-[10px] text-slate-700 mt-5 font-medium">
-                    🔒 Secured with encrypted JWT authentication
+                    🔒 Secured with encrypted JWT &amp; Google OAuth 2.0
                 </p>
             </div>
         </div>

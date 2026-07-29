@@ -1,6 +1,7 @@
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.14.2
+Authlib==1.7.2
 bcrypt==4.0.1
 certifi==2026.6.17
 cffi==2.1.0
@@ -13,6 +14,7 @@ dnspython==2.8.0
 ecdsa==0.19.2
 email-validator==2.3.0
 fastapi==0.139.0
+google-auth==2.56.2
 greenlet==3.5.3
 groq==1.5.0
 gunicorn==26.0.0
@@ -20,6 +22,8 @@ h11==0.16.0
 httpcore==1.0.9
 httpx==0.28.1
 idna==3.18
+itsdangerous==2.2.0
+joserfc==1.7.4
 packaging==26.2
 passlib==1.7.4
 psycopg2-binary==2.9.12

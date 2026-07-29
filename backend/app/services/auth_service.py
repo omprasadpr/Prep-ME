@@ -1,11 +1,21 @@
+import secrets
+# pyrefly: ignore [missing-import]
 from fastapi import HTTPException, status
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
+# pyrefly: ignore [missing-import]
+from google.oauth2 import id_token as google_id_token
+# pyrefly: ignore [missing-import]
+from google.auth.transport import requests as google_requests
+
+from app.core.config import settings
 from app.models.user import User
 from app.schemas.auth_schema import (
     RegisterRequest,
     LoginRequest,
     ResendVerificationRequest,
+    GoogleLoginRequest,
 )
 
 from app.utils.password import (
@@ -150,6 +160,75 @@ def login_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Please verify your email before logging in.",
         )
+
+    access_token = create_access_token(
+        data={"sub": user.email}
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+
+
+def google_login_user(
+    data: GoogleLoginRequest,
+    db: Session,
+):
+    """Verify Google ID token, retrieve or create user in PostgreSQL, and issue access token."""
+    try:
+        req = google_requests.Request()
+        client_id = settings.GOOGLE_CLIENT_ID if settings.GOOGLE_CLIENT_ID else None
+
+        id_info = google_id_token.verify_oauth2_token(
+            data.id_token,
+            req,
+            audience=client_id,
+        )
+
+        email = id_info.get("email", "").strip().lower()
+        full_name = id_info.get("name", "Google User").strip()
+
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Google token does not contain a valid email address."
+            )
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid Google ID token: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Google authentication failed: {str(e)}"
+        )
+
+    user = (
+        db.query(User)
+        .filter(User.email == email)
+        .first()
+    )
+
+    if user:
+        if not user.is_verified:
+            user.is_verified = True
+            db.commit()
+            db.refresh(user)
+    else:
+        random_password = secrets.token_urlsafe(32)
+        user = User(
+            full_name=full_name,
+            email=email,
+            hashed_password=hash_password(random_password),
+            is_active=True,
+            is_verified=True,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
     access_token = create_access_token(
         data={"sub": user.email}
