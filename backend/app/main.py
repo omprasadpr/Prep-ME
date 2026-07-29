@@ -1,4 +1,6 @@
+# pyrefly: ignore [missing-import]
 from fastapi import FastAPI
+# pyrefly: ignore [missing-import]
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import Base, engine
@@ -23,10 +25,6 @@ from app.routes.dashboard import router as dashboard_router
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
-print("===================================")
-print("THIS IS MY BACKEND")
-print("===================================")
-
 app = FastAPI(
     title="AI Interview Analyzer API"
 )
@@ -40,7 +38,7 @@ app.add_middleware(
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
-        "*",
+        "https://prep-me-livid.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
