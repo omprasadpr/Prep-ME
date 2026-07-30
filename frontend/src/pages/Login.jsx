@@ -144,7 +144,7 @@ function Login() {
                             <div className="w-full border-t border-white/[0.06]" />
                         </div>
                         <div className="relative flex justify-center">
-                            <span className="bg-[#0D1117] px-3 text-[10px] text-slate-500 font-bold uppercase tracking-wider">OR CONTINUE WITH EMAIL</span>
+                            <span className="bg-[#0D1117] px-3 text-[10px] text-slate-500 font-bold uppercase tracking-wider">OR CONTINUE WITH CREDENTIALS</span>
                         </div>
                     </div>
 
