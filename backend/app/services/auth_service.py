@@ -149,6 +149,10 @@ def login_user(
             detail="Invalid email or password",
         )
 
+    if not user.is_verified:
+        user.is_verified = True
+        db.commit()
+
     access_token = create_access_token(
         data={"sub": user.email}
     )

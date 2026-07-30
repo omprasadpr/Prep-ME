@@ -170,7 +170,7 @@ function Register() {
                             </p>
                         </>
                 </div>
-                <p className="text-center text-[10px] text-slate-700 mt-5 font-medium">🔒 Secure JWT Email Verification</p>
+                <p className="text-center text-[10px] text-slate-700 mt-5 font-medium">🔒 Secured with encrypted JWT</p>
             </div>
         </div>
     );
