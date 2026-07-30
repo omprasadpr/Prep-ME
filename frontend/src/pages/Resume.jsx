@@ -17,6 +17,7 @@ import ATSScoreCard from "../components/resume/ATSScoreCard";
 import TechnicalSkillsCard from "../components/resume/TechnicalSkillsCard";
 import MissingSkillsCard from "../components/resume/MissingSkillsCard";
 import SuggestionCard from "../components/resume/SuggestionCard";
+import ProjectAnalysisCard from "../components/resume/ProjectAnalysisCard";
 
 function Resume() {
     const [resumeData, setResumeData] = useState(null);
@@ -240,6 +241,7 @@ function Resume() {
                                 <ATSScoreCard analysis={resumeData.analysis} />
                                 <TechnicalSkillsCard analysis={resumeData.analysis} />
                             </div>
+                            <ProjectAnalysisCard analysis={resumeData.analysis} />
                             <div className="grid gap-6 lg:grid-cols-2">
                                 <MissingSkillsCard analysis={resumeData.analysis} />
                                 <SuggestionCard analysis={resumeData.analysis} />

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import WelcomeBanner from "../components/dashboard/WelcomeBanner";
 import QuickStats from "../components/dashboard/QuickStats";
+import PerformanceChart from "../components/dashboard/PerformanceChart";
 import QuickActions from "../components/dashboard/QuickActions";
 import RecentInterviews from "../components/dashboard/RecentInterviews";
 import { getDashboard } from "../services/dashboardApi";
@@ -76,6 +77,9 @@ function Dashboard() {
             <WelcomeBanner userName={dashboard?.user_name} />
             
             <QuickStats stats={dashboard?.quick_stats} />
+
+            {/* Performance Bar Chart placed directly between QuickStats and QuickActions */}
+            <PerformanceChart interviews={dashboard?.recent_interviews} stats={dashboard?.quick_stats} />
 
             <QuickActions />
 
