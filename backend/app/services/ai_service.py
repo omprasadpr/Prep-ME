@@ -329,107 +329,105 @@ def generate_interview_questions(
     difficulty: str,
     total_questions: int = 10,
 ):
-
     prompt = f"""
-You are an Elite Staff Software Engineer and Technical Interviewer at a top-tier tech company.
+You are an Elite Principal Staff Software Engineer and Lead Technical Interviewer at Google/FAANG.
 
-You are conducting a highly realistic and rigorous STRUCTURED technical interview.
+You are conducting a hyper-realistic, highly structured, and authentic technical interview for a candidate applying for the target role: "{role}" (Experience Level: {experience}, Interview Rigor / Difficulty: {difficulty}).
 
-Candidate Resume
+CANDIDATE RESUME
 ------------------------
 {resume_text}
 ------------------------
 
-Target Role: {role}
-Experience: {experience}
-Difficulty: {difficulty}
+You MUST generate EXACTLY {total_questions} interview questions adhering STRICTLY to the following sequence and category distribution:
 
-Generate EXACTLY {total_questions} interview questions following this STRICT structure in this EXACT order.
-DO NOT change the order. DO NOT skip any category.
+=== MANDATORY 10-QUESTION BLUEPRINT ===
 
-=== MANDATORY QUESTION STRUCTURE ===
+Q1 — PERSONAL INTRODUCTION & BACKGROUND:
+  - Question MUST BE EXACTLY: "Tell me about yourself and walk me through your background relevant to this role."
+  - Ideal Answer: A structured 2-3 minute response covering education, key technical skills, primary projects, and career alignment with the {role} role.
 
-Q1 — INTRODUCTION (1 question):
-  The question MUST be: "Tell me about yourself and walk me through your background relevant to this role."
-  ideal_answer: A structured response covering the candidate's education, key technologies from their resume, notable projects, and how their background aligns with the {role} role.
+Q2 — RECENT TECH STACK & SKILLS EXPLORATION:
+  - Question MUST BE EXACTLY: "What are the recent skills and technologies you have worked with in your latest projects or roles?"
+  - Ideal Answer: Clear summary of tools, languages, frameworks, cloud services, and recent hands-on projects worked on.
 
-Q2, Q3, Q4, Q5 — PROJECT-BASED (4 questions):
-  - Read the candidate resume carefully. Find their actual listed projects.
-  - Ask DEEP, highly specific questions referencing those real project names and technologies.
-  - Focus on: architecture decisions, database schema choices, scalability bottlenecks, security trade-offs, third-party integrations, and deployment strategy.
-  - FORBIDDEN: Do NOT ask "What is REST?" or "What is React?" or any definition-style question.
-  - REQUIRED: Use "how", "why", "what trade-offs", "how would you scale" phrasing.
-  - Anti-Hallucination: Only reference projects and skills explicitly listed in the resume.
+Q3 — TECHNICAL SKILLS SECTION DEEP-DIVE (1 Question):
+  - Read the candidate's Technical Skills section on their resume carefully.
+  - Pick one of their core listed skills, frameworks, or languages and ask a deep technical concept, framework architecture, or language internal question.
+  - Ideal Answer: Deep technical explanation covering internal mechanics, best practices, and practical implementation.
 
-Q6, Q7 — CODING / TECHNICAL PROBLEM SOLVING (2 questions):
-  - Ask practical, implementation-level questions directly relevant to the {role} role.
-  - Examples: write a function to do X, explain the time complexity of your approach, optimize a database query, debug a given code snippet, choose a data structure and justify it.
-  - Scale difficulty to: {difficulty}.
-  - These should be hands-on, not theoretical.
+Q4, Q5, Q6 — PROJECT DEEP-DIVES (3 Questions):
+  - Read the candidate's Projects section on their resume.
+  - Ask 3 deep, highly realistic architectural, schema, or system trade-off questions explicitly referencing actual project names, databases, APIs, and tools listed on their resume.
+  - Q4: Project Architecture, API Design, and Database Schema choices.
+  - Q5: Scalability bottlenecks, Caching strategies, and Performance optimizations.
+  - Q6: Security trade-offs, Authentication, Third-party APIs, or Deployment Pipeline decisions.
+  - Ideal Answer: Detailed architectural response addressing trade-offs, edge cases, and design choices.
 
-Q8, Q9, Q10 — BEHAVIOURAL & MANAGEMENT (3 questions, one from each category):
-  Q8 — Conflict Resolution: Ask about a time the candidate disagreed with a teammate or manager on a technical decision and how they resolved it.
-  Q9 — Leadership & Ownership: Ask about a situation where they took ownership of a project or stepped up when things were going wrong.
-  Q10 — Prioritization & Time Management: Ask how they handle competing deadlines, ambiguous requirements, or urgent production issues.
-  - All 3 must be open-ended STAR-method style questions.
-  - ideal_answer for each should describe what a strong STAR response looks like.
+Q7, Q8 — EASY CODING & ALGORITHMIC QUESTIONS (2 Questions):
+  - Ask 2 practical, entry/intermediate-level hands-on coding or algorithmic problem-solving questions tailored to their primary programming language (e.g. Python, JavaScript, Java, C++).
+  - Focus: Arrays, Strings, HashMaps, Data Transformation pipelines, or basic algorithmic logic.
+  - Scale difficulty to: Easy / Intermediate for {difficulty}.
+  - Ideal Answer: Optimal code snippet, step-by-step logic explanation, and Time/Space Complexity analysis (e.g., O(N) time, O(1) space).
 
-=== GENERAL RULES ===
-- NO duplicate questions.
-- Generate an extremely precise `ideal_answer` for EVERY question appropriate for the {experience} level.
-- Output ONLY valid JSON. No extra text outside the JSON.
+Q9 — HARD CODING & COMPLEX PROBLEM-SOLVING QUESTION (1 Question):
+  - Ask 1 advanced coding or complex algorithmic problem-solving challenge scaled to the specified {difficulty} level.
+  - Focus: Concurrency/Multithreading, Rate-Limiting algorithm, Complex Data Structure implementation (e.g. LRU Cache, Trie, Graph traversal), or Heavy Data Processing optimization.
+  - Ideal Answer: Complete algorithmic code solution, handling of edge cases, time/space complexity proof, and concurrency/memory trade-offs.
 
-Return ONLY this JSON format:
+Q10 — MANAGEMENT & BEHAVIORAL LEADERSHIP QUESTION (1 Question):
+  - Ask an authentic behavioral/management question focused on technical leadership, handling conflict with teammates/managers, making difficult priority trade-offs under tight deadlines, or managing production outages.
+  - Ideal Answer: A structured STAR-method (Situation, Task, Action, Result) response showing engineering maturity, ownership, and emotional intelligence.
 
+=== CRITICAL EVALUATION RULES ===
+1. Generate an extremely precise, detailed, high-quality `ideal_answer` for EVERY single question (Q1 through Q10).
+2. For coding questions (Q7, Q8, Q9), include code snippets, optimal time/space complexity (O(N), O(1)), and key edge cases in the `ideal_answer`.
+3. Output ONLY valid JSON in the exact structure below.
+
+Return format:
 {{
-    "questions":[
+    "questions": [
         {{
-            "question_number":1,
-            "question":"Tell me about yourself and walk me through your background relevant to this role.",
-            "ideal_answer":"A structured 2-3 minute answer covering: education background, primary technical skills from the resume, 1-2 key projects with impact, the candidate's interest in the {role} role, and their career goal."
-        }}
+            "question_number": 1,
+            "question": "Tell me about yourself and walk me through your background relevant to this role.",
+            "ideal_answer": "A structured response covering..."
+        }},
+        ...
     ]
 }}
 """
 
     try:
-
         response = client.chat.completions.create(
-
             model="llama-3.3-70b-versatile",
-
-            temperature=0.4,
-
+            temperature=0.3,
             response_format={
                 "type": "json_object"
             },
-
             messages=[
-
                 {
                     "role": "system",
-                    "content": "You are an Elite Staff Software Engineer and structured technical interviewer. You ALWAYS follow the exact question structure given. You NEVER deviate from the order or categories specified in the prompt."
+                    "content": "You are an Elite Principal Staff Software Engineer and Lead Technical Interviewer. You ALWAYS follow the exact 10-question blueprint provided without skipping or changing any category."
                 },
-
                 {
                     "role": "user",
                     "content": prompt
                 }
-
             ]
-
         )
 
         return json.loads(
             response.choices[0].message.content
         )
 
-    except Exception:
-
+    except Exception as e:
+        print(f"[AI SERVICE ERROR] Question Generation Failed: {e}")
         return {
             "questions": []
         }
-    # =====================================================
+
+
+# =====================================================
 # Evaluate Candidate Answer
 # =====================================================
 
@@ -438,60 +436,52 @@ def evaluate_answer(
     ideal_answer: str,
     user_answer: str,
 ):
-
     prompt = f"""
-You are an Elite Staff Software Engineer conducting a strict but fair technical interview.
+You are a Principal Staff Software Engineer at Google/FAANG evaluating a candidate's answer during a real technical interview.
 
-Critically evaluate the candidate's answer for deep technical accuracy and practical understanding.
-
-Question:
+QUESTION ASKED:
 {question}
 
-Ideal Answer (Baseline for correctness):
+IDEAL / BENCHMARK ANSWER:
 {ideal_answer}
 
-Candidate Answer:
+CANDIDATE'S SUBMITTED ANSWER:
 {user_answer}
 
-Instructions for High Accuracy Evaluation:
-1. Conceptual Correctness: Do not just look for keyword matches. If the candidate explains the concept correctly using different terminology, give them credit.
-2. Flaw Detection: Identify logical flaws, incorrect assumptions, or bad practices in their answer.
-3. Scoring (0 to 10):
-   - 9-10: Perfect, deep understanding, addresses edge cases.
-   - 7-8: Correct but slightly incomplete.
-   - 4-6: Partial understanding, missing key technical details.
-   - 1-3: Fundamentally incorrect or showing critical misunderstandings.
-   - 0: Completely irrelevant or no answer.
-4. Actionable Feedback: Be highly specific. State exactly what was wrong or missing. Do NOT use generic phrases like "Good effort".
-5. Keep feedback concise (2-4 sentences max).
+EVALUATION CRITERIA:
+1. Technical Accuracy & Depth: Does the candidate demonstrate true engineering competence, or surface-level fluff?
+2. Logical Flaws & Edge Cases: Did they identify failure modes, time/space complexity trade-offs, or security/concurrency risks?
+3. Communication & Structure: For coding questions, is code clean & correct? For behavioral/project questions, is it structured (STAR method)?
+4. Scoring Scale (0 to 10):
+   - 9-10: Exceptional. Deep understanding, covers edge cases & trade-offs flawlessly.
+   - 7-8: Solid. Correct explanation, minor details or optimizations missed.
+   - 5-6: Partial. Grasps basic idea, but lacks technical depth or contains slight misunderstandings.
+   - 3-4: Weak. Misses key concepts, contains notable errors or fluff.
+   - 1-2: Poor. Critical technical misunderstandings.
+   - 0: Completely incorrect, blank, or irrelevant answer.
 
-Return ONLY valid JSON.
+FEEDBACK REQUIREMENTS:
+- Be realistic, professional, direct, and constructive like a real senior interviewer.
+- Clearly state what the candidate got right, what key technical details/edge cases were missed, and how to improve.
 
-Format:
-
+Return ONLY valid JSON format:
 {{
-    "score": 0,
-    "feedback": "Specific technical feedback explaining exactly what was correct, missing, or fundamentally misunderstood."
+    "score": 8,
+    "feedback": "Detailed, highly actionable, professional feedback explaining strengths, missing technical details, and improvement recommendations."
 }}
 """
 
     try:
-
         response = client.chat.completions.create(
-
             model="llama-3.3-70b-versatile",
-
             temperature=0.2,
-
             response_format={
                 "type": "json_object"
             },
-
             messages=[
                 {
                     "role": "system",
-                    "content":
-                    "You are an expert technical interviewer."
+                    "content": "You are an expert technical interviewer evaluating candidate answers with strict engineering rigor."
                 },
                 {
                     "role": "user",
@@ -504,15 +494,18 @@ Format:
             response.choices[0].message.content
         )
 
-    except Exception:
-
+    except Exception as e:
+        print(f"[AI SERVICE ERROR] Answer Evaluation Failed: {e}")
         return {
             "score": 0,
-            "feedback": "Unable to evaluate answer."
+            "feedback": "Unable to evaluate answer due to a service error."
         }
-    # =====================================================
+
+
+# =====================================================
 # Generate Final Interview Report
 # =====================================================
+
 def generate_interview_report(
     role: str,
     experience: str,
@@ -520,89 +513,71 @@ def generate_interview_report(
     resume_text: str,
     questions_and_answers: str,
 ):
-
     prompt = f"""
-You are a Principal Staff Engineer and Hiring Committee Member at a top-tier tech company.
+You are a Lead Hiring Committee Chair and Principal Staff Engineer reviewing the complete transcript of a candidate's 10-question technical interview.
 
-You are evaluating a candidate based on a complete transcript of a highly rigorous technical interview.
+CANDIDATE PROFILE:
+Role: {role}
+Experience Level: {experience}
+Interview Difficulty: {difficulty}
 
-Candidate Resume
+CANDIDATE RESUME:
 -----------------------------
 {resume_text}
 -----------------------------
 
-Role:
-{role}
-Experience:
-{experience}
-Difficulty:
-{difficulty}
-
-Interview Transcript
+INTERVIEW TRANSCRIPT & EVALUATIONS:
 --------------------------------
 {questions_and_answers}
 --------------------------------
 
-Your task is to provide a highly accurate, analytical, and objective evaluation of the candidate's performance.
+Conduct a thorough, analytical, objective evaluation across all dimensions:
+1. Technical Competence & Architectural Depth (Resume Projects & Technical Questions Q3-Q6)
+2. Algorithmic & Problem Solving Mastery (Coding Questions Q7, Q8, Q9)
+3. Management, Leadership & Communication Maturity (Intro & Behavioral Q1, Q2, Q10)
+4. Consistency & Seniority Alignment with Resume Claims
 
-Evaluation Dimensions:
-- Technical Depth: Did they understand the underlying systems, or just surface-level APIs?
-- Problem Solving: Did they identify edge cases and trade-offs?
-- Communication: Were their answers structured and articulate?
-- Authenticity: Did their answers align with the seniority claimed in their resume?
+SCORING (Integer 0 to 100):
+- overall_score: Weighted composite performance score (0-100).
+- technical_score: Deep system architecture & technical skills score (0-100).
+- communication_score: Clarity, structure, and STAR method articulation score (0-100).
+- confidence_score: Confidence and technical conviction demonstrated (0-100).
 
-IMPORTANT SCORING RULES
-- Return ALL scores as INTEGER values between 0 and 100. DO NOT use a 0–10 scale. DO NOT return decimal values.
-- Scoring Guide:
-  - 90-100: Exceptional (Top 5% of candidates, deep expertise)
-  - 80-89: Strong (Solid understanding, independent contributor)
-  - 70-79: Passable (Has basics, but lacks depth in some areas)
-  - 50-69: Needs Improvement (Fundamental gaps identified)
-  - 0-49: Fail (Critical technical misunderstandings)
+HIRING RECOMMENDATION MUST BE ONE OF:
+- "Strong Hire" (Top 5% candidate, outstanding across coding, architecture, and communication)
+- "Hire" (Solid engineer, meets bar, minor gaps that can be mentored)
+- "Borderline" (Mixed signals, weak in coding or project depth)
+- "Needs Improvement" (Clear technical gaps or failed coding/architectural challenges)
 
-Actionable Insights:
-- `strengths`: Extract 2-3 highly specific technical strengths demonstrated in the transcript.
-- `weaknesses`: Extract 2-3 specific technical gaps or misunderstandings from their answers. Avoid generic feedback.
-- `overall_feedback`: Write a critical, executive summary (3-4 sentences) justifying your recommendation.
+INSIGHTS REQUIRED:
+- `strengths`: 3-4 specific technical and communication strengths highlighted during the interview.
+- `weaknesses`: 3-4 concrete technical gaps, missing edge cases, or code inefficiencies identified.
+- `overall_feedback`: In-depth executive summary (4-6 sentences) synthesizing their overall fit for the {role} role.
 
-Recommendation MUST be exactly one of:
-Strong Hire
-Hire
-Borderline
-Needs Improvement
-
-Return ONLY valid JSON.
-
-Format:
-
+Return ONLY valid JSON format:
 {{
-    "overall_score":0,
-    "technical_score":0,
-    "communication_score":0,
-    "confidence_score":0,
-    "strengths":"Specific strength 1. Specific strength 2.",
-    "weaknesses":"Specific weakness 1. Specific weakness 2.",
-    "overall_feedback":"Justification based on specific performance.",
-    "recommendation":"Hire"
+    "overall_score": 85,
+    "technical_score": 88,
+    "communication_score": 82,
+    "confidence_score": 84,
+    "strengths": "• Excellent understanding of microservice API design and SQL query indexing.\\n• Solved the easy coding problem cleanly with O(N) time complexity.\\n• Strong STAR-method communication during project trade-off discussions.",
+    "weaknesses": "• Struggled with memory allocation trade-offs in the hard coding question.\\n• Did not mention rate-limiting edge cases when scaling backend services.",
+    "overall_feedback": "The candidate demonstrated strong core technical proficiency suitable for a {role}. They showed solid communication and practical project experience...",
+    "recommendation": "Hire"
 }}
 """
 
     try:
-
         response = client.chat.completions.create(
-
             model="llama-3.3-70b-versatile",
-
             temperature=0.2,
-
             response_format={
                 "type": "json_object"
             },
-
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a senior software engineering interviewer."
+                    "content": "You are a Lead Hiring Committee Chair and Principal Staff Engineer evaluating technical candidate transcripts."
                 },
                 {
                     "role": "user",
@@ -615,24 +590,15 @@ Format:
             response.choices[0].message.content
         )
 
-    except Exception:
-
+    except Exception as e:
+        print(f"[AI SERVICE ERROR] Report Generation Failed: {e}")
         return {
-
             "overall_score": 0,
-
             "technical_score": 0,
-
             "communication_score": 0,
-
             "confidence_score": 0,
-
             "strengths": "Unable to evaluate.",
-
             "weaknesses": "Unable to evaluate.",
-
             "overall_feedback": "Interview report generation failed.",
-
             "recommendation": "Needs Improvement"
-
         }

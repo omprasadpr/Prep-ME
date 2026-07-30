@@ -73,6 +73,7 @@ def generate_questions(
             interview_id=interview.id,
             question_number=item["question_number"],
             question=item["question"],
+            ideal_answer=item.get("ideal_answer", ""),
         )
 
         db.add(question)
