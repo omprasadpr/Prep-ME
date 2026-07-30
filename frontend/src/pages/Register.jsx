@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { BrainCircuit, ArrowRight, Eye, EyeOff, MailCheck, RefreshCw } from "lucide-react";
-import { registerUser, resendVerificationEmail } from "../services/authApi";
+import { Link, useNavigate } from "react-router-dom";
+import { BrainCircuit, ArrowRight, Eye, EyeOff, MailCheck, RefreshCw, UserCheck } from "lucide-react";
+import { registerUser, guestLoginUser, resendVerificationEmail } from "../services/authApi";
 
 function Register() {
     const [name, setName] = useState("");
@@ -14,19 +14,36 @@ function Register() {
     const [resending, setResending] = useState(false);
     const [resendMessage, setResendMessage] = useState(null);
 
+    const navigate = useNavigate();
+
     const handleRegister = async (e) => {
         e.preventDefault();
         setError(null);
         try {
             setLoading(true);
             await registerUser({ full_name: name, email, password });
-            setRegisteredEmail(email);
+            navigate("/");
         } catch (err) {
             setError(err.response?.data?.detail || err.message || "Registration failed.");
         } finally {
             setLoading(false);
         }
     };
+
+    const handleGuestLogin = async () => {
+        setError(null);
+        try {
+            setLoading(true);
+            const data = await guestLoginUser();
+            localStorage.setItem("token", data.access_token);
+            navigate("/dashboard");
+        } catch (err) {
+            setError(err.response?.data?.detail || "Guest login failed.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     const handleResend = async () => {
         if (!registeredEmail || resending) return;
@@ -114,6 +131,26 @@ function Register() {
                     ) : (
                         /* ── Registration Form ── */
                         <>
+                            {/* ── Guest Sign-In ── */}
+                            <button
+                                type="button"
+                                onClick={handleGuestLogin}
+                                disabled={loading}
+                                className="w-full mb-4 py-3 rounded-full bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10 active:scale-[0.98]"
+                            >
+                                <UserCheck size={16} className="text-emerald-400" />
+                                <span>Continue as Guest</span>
+                            </button>
+
+                            <div className="relative my-4">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-white/[0.06]" />
+                                </div>
+                                <div className="relative flex justify-center">
+                                    <span className="bg-[#0D1117] px-3 text-[10px] text-slate-500 font-bold uppercase tracking-wider">OR REGISTER WITH EMAIL</span>
+                                </div>
+                            </div>
+
                             {error && (
                                 <div className="mb-4 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">
                                     <p className="text-red-400 text-xs font-semibold">{error}</p>

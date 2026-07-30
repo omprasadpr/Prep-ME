@@ -15,6 +15,11 @@ export const googleLoginUser = async (data) => {
     return response.data;
 };
 
+export const guestLoginUser = async () => {
+    const response = await api.post("/auth/guest");
+    return response.data;
+};
+
 export const verifyEmailToken = async (token) => {
     const response = await api.get(`/auth/verify-email?token=${encodeURIComponent(token)}`);
     return response.data;

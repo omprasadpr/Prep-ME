@@ -69,18 +69,12 @@ def register_user(
         full_name=full_name,
         email=normalized_email,
         hashed_password=hash_password(user_data.password),
-        is_verified=False,
+        is_verified=True,
     )
 
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-
-    token = create_verification_token(new_user.email)
-    try:
-        EmailService.send_verification_email(new_user.email, new_user.full_name, token)
-    except Exception as e:
-        print(f"[AUTH WARNING] Email dispatch error: {e}")
 
     return new_user
 
@@ -155,11 +149,35 @@ def login_user(
             detail="Invalid email or password",
         )
 
-    if not user.is_verified:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Please verify your email before logging in.",
-        )
+    access_token = create_access_token(
+        data={"sub": user.email}
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+
+
+def guest_login_user(
+    db: Session,
+):
+    """Generate 1-click Guest session for instant PrepME access."""
+    guest_id = secrets.token_hex(4)
+    guest_email = f"guest_{guest_id}@prepme.ai"
+    guest_name = f"Guest User {guest_id}"
+    random_password = secrets.token_urlsafe(32)
+
+    user = User(
+        full_name=guest_name,
+        email=guest_email,
+        hashed_password=hash_password(random_password),
+        is_active=True,
+        is_verified=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
 
     access_token = create_access_token(
         data={"sub": user.email}
@@ -169,6 +187,7 @@ def login_user(
         "access_token": access_token,
         "token_type": "bearer",
     }
+
 
 
 def google_login_user(

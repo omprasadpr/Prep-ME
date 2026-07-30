@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BrainCircuit, ArrowRight, Eye, EyeOff, MailWarning, RefreshCw } from "lucide-react";
+import { BrainCircuit, ArrowRight, Eye, EyeOff, MailWarning, RefreshCw, UserCheck } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
-import { loginUser, googleLoginUser, resendVerificationEmail } from "../services/authApi";
+import { loginUser, googleLoginUser, guestLoginUser, resendVerificationEmail } from "../services/authApi";
 
 function Login() {
     const [email, setEmail] = useState("");
@@ -64,6 +64,21 @@ function Login() {
             setLoading(false);
         }
     };
+
+    const handleGuestLogin = async () => {
+        setError(null);
+        try {
+            setLoading(true);
+            const data = await guestLoginUser();
+            localStorage.setItem("token", data.access_token);
+            navigate("/dashboard");
+        } catch (err) {
+            setError(err.response?.data?.detail || "Guest login failed.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     const handleGoogleError = () => {
         setError("Google Sign-In was cancelled or failed.");
@@ -154,6 +169,17 @@ function Login() {
                         </div>
                     )}
 
+                    {/* ── Guest Sign-In ── */}
+                    <button
+                        type="button"
+                        onClick={handleGuestLogin}
+                        disabled={loading}
+                        className="w-full mb-4 py-3 rounded-full bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10 active:scale-[0.98]"
+                    >
+                        <UserCheck size={16} className="text-emerald-400" />
+                        <span>Continue as Guest</span>
+                    </button>
+
                     {/* ── Google Sign-In ── */}
                     <div className="mb-6 flex justify-center w-full">
                         <GoogleLogin
@@ -163,7 +189,7 @@ function Login() {
                             theme="filled_black"
                             shape="pill"
                             text="continue_with"
-                            width="100%"
+                            width="350"
                         />
                     </div>
 

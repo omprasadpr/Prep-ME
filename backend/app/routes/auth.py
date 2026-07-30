@@ -28,6 +28,7 @@ from app.services.auth_service import (
     verify_email,
     resend_verification,
     google_login_user,
+    guest_login_user,
 )
 
 router = APIRouter(
@@ -59,6 +60,16 @@ def login(
 
 
 @router.post(
+    "/guest",
+    response_model=TokenResponse,
+)
+def guest_login(
+    db: Session = Depends(get_db),
+):
+    return guest_login_user(db)
+
+
+@router.post(
     "/google",
     response_model=TokenResponse,
 )
@@ -67,6 +78,7 @@ def google_login(
     db: Session = Depends(get_db),
 ):
     return google_login_user(data, db)
+
 
 
 @router.get(
