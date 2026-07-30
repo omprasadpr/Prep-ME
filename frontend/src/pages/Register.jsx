@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BrainCircuit, ArrowRight, Eye, EyeOff, MailCheck, RefreshCw, UserCheck } from "lucide-react";
-import { registerUser, guestLoginUser, resendVerificationEmail } from "../services/authApi";
+import { BrainCircuit, ArrowRight, Eye, EyeOff, UserCheck } from "lucide-react";
+import { registerUser, guestLoginUser } from "../services/authApi";
 
 function Register() {
     const [name, setName] = useState("");
@@ -10,9 +10,6 @@ function Register() {
     const [loading, setLoading] = useState(false);
     const [showPass, setShowPass] = useState(false);
     const [error, setError] = useState(null);
-    const [registeredEmail, setRegisteredEmail] = useState(null);
-    const [resending, setResending] = useState(false);
-    const [resendMessage, setResendMessage] = useState(null);
 
     const navigate = useNavigate();
 
@@ -41,21 +38,6 @@ function Register() {
             setError(err.response?.data?.detail || "Guest login failed.");
         } finally {
             setLoading(false);
-        }
-    };
-
-
-    const handleResend = async () => {
-        if (!registeredEmail || resending) return;
-        setResendMessage(null);
-        setResending(true);
-        try {
-            const res = await resendVerificationEmail(registeredEmail);
-            setResendMessage(res.message || "A new verification link has been sent.");
-        } catch (err) {
-            setResendMessage(err.response?.data?.detail || "Failed to resend link.");
-        } finally {
-            setResending(false);
         }
     };
 
@@ -91,65 +73,27 @@ function Register() {
                         <p className="text-slate-500 text-xs mt-1.5 font-medium">Create Your Free Account</p>
                     </div>
 
-                    {registeredEmail ? (
-                        /* ── Verification Sent Screen ── */
-                        <div className="text-center py-4">
-                            <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-5 text-emerald-400">
-                                <MailCheck size={32} />
+                    {/* ── Registration Form ── */}
+                    <>
+                        {/* ── Guest Sign-In ── */}
+                        <button
+                            type="button"
+                            onClick={handleGuestLogin}
+                            disabled={loading}
+                            className="w-full mb-4 py-3 rounded-full bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10 active:scale-[0.98]"
+                        >
+                            <UserCheck size={16} className="text-emerald-400" />
+                            <span>Continue as Guest</span>
+                        </button>
+
+                        <div className="relative my-4">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-white/[0.06]" />
                             </div>
-                            <h2 className="text-xl font-bold text-white mb-2">Check Your Inbox</h2>
-                            <p className="text-slate-400 text-xs leading-relaxed mb-6">
-                                We sent a verification link to <br />
-                                <span className="text-white font-semibold break-all">{registeredEmail}</span>.<br />
-                                Click the <strong className="text-emerald-400">Verify Email</strong> button in the email to activate your account.
-                            </p>
-
-                            {resendMessage && (
-                                <div className="mb-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-xs text-emerald-300">
-                                    {resendMessage}
-                                </div>
-                            )}
-
-                            <div className="space-y-3">
-                                <button
-                                    onClick={handleResend}
-                                    disabled={resending}
-                                    className="w-full py-3 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-50"
-                                >
-                                    <RefreshCw size={14} className={resending ? "animate-spin" : ""} />
-                                    <span>{resending ? "Resending Link..." : "Resend Verification Link"}</span>
-                                </button>
-
-                                <Link
-                                    to="/"
-                                    className="block w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-sm transition text-center shadow-lg shadow-emerald-600/20"
-                                >
-                                    Go to Login &rarr;
-                                </Link>
+                            <div className="relative flex justify-center">
+                                <span className="bg-[#0D1117] px-3 text-[10px] text-slate-500 font-bold uppercase tracking-wider">OR REGISTER WITH EMAIL</span>
                             </div>
                         </div>
-                    ) : (
-                        /* ── Registration Form ── */
-                        <>
-                            {/* ── Guest Sign-In ── */}
-                            <button
-                                type="button"
-                                onClick={handleGuestLogin}
-                                disabled={loading}
-                                className="w-full mb-4 py-3 rounded-full bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10 active:scale-[0.98]"
-                            >
-                                <UserCheck size={16} className="text-emerald-400" />
-                                <span>Continue as Guest</span>
-                            </button>
-
-                            <div className="relative my-4">
-                                <div className="absolute inset-0 flex items-center">
-                                    <div className="w-full border-t border-white/[0.06]" />
-                                </div>
-                                <div className="relative flex justify-center">
-                                    <span className="bg-[#0D1117] px-3 text-[10px] text-slate-500 font-bold uppercase tracking-wider">OR REGISTER WITH EMAIL</span>
-                                </div>
-                            </div>
 
                             {error && (
                                 <div className="mb-4 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">

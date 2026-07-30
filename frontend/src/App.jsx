@@ -4,7 +4,6 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import VerifyEmail from "./pages/VerifyEmail";
 import Resume from "./pages/Resume";
 import Interview from "./pages/Interview";
 
@@ -18,7 +17,6 @@ function App() {
             {/* Auth Routes */}
             <Route path="/" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
 
             {/* Authenticated Application Routes with persistent Sidebar & Navbar */}
             <Route element={<DashboardLayout />}>

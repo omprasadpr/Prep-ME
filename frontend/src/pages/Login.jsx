@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BrainCircuit, ArrowRight, Eye, EyeOff, MailWarning, RefreshCw, UserCheck } from "lucide-react";
+import { BrainCircuit, ArrowRight, Eye, EyeOff, UserCheck } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
-import { loginUser, googleLoginUser, guestLoginUser, resendVerificationEmail } from "../services/authApi";
+import { loginUser, googleLoginUser, guestLoginUser } from "../services/authApi";
 
 function Login() {
     const [email, setEmail] = useState("");
@@ -10,9 +10,6 @@ function Login() {
     const [loading, setLoading] = useState(false);
     const [showPass, setShowPass] = useState(false);
     const [error, setError] = useState(null);
-    const [unverifiedEmail, setUnverifiedEmail] = useState(null);
-    const [resending, setResending] = useState(false);
-    const [resendMessage, setResendMessage] = useState(null);
 
     const navigate = useNavigate();
 
@@ -31,8 +28,6 @@ function Login() {
     const handleLogin = async (e) => {
         e.preventDefault();
         setError(null);
-        setUnverifiedEmail(null);
-        setResendMessage(null);
         try {
             setLoading(true);
             const data = await loginUser({ email, password });
@@ -40,11 +35,7 @@ function Login() {
             navigate("/dashboard");
         } catch (err) {
             const detail = err.response?.data?.detail;
-            if (err.response?.status === 403 || (typeof detail === "string" && detail.toLowerCase().includes("verify"))) {
-                setUnverifiedEmail(email);
-            } else {
-                setError(detail || err.message || "Something went wrong.");
-            }
+            setError(detail || err.message || "Something went wrong.");
         } finally {
             setLoading(false);
         }
@@ -52,7 +43,6 @@ function Login() {
 
     const handleGoogleSuccess = async (credentialResponse) => {
         setError(null);
-        setUnverifiedEmail(null);
         try {
             setLoading(true);
             const data = await googleLoginUser({ id_token: credentialResponse.credential });
@@ -79,23 +69,8 @@ function Login() {
         }
     };
 
-
     const handleGoogleError = () => {
         setError("Google Sign-In was cancelled or failed.");
-    };
-
-    const handleResend = async () => {
-        if (!unverifiedEmail || resending) return;
-        setResendMessage(null);
-        setResending(true);
-        try {
-            const res = await resendVerificationEmail(unverifiedEmail);
-            setResendMessage(res.message || "A new verification link has been sent.");
-        } catch (err) {
-            setResendMessage(err.response?.data?.detail || "Failed to resend verification link.");
-        } finally {
-            setResending(false);
-        }
     };
 
     return (
@@ -132,35 +107,6 @@ function Login() {
                         </div>
                         <p className="text-slate-500 text-xs mt-1.5 font-medium">AI Interview &amp; Resume Copilot</p>
                     </div>
-
-                    {/* Unverified email banner */}
-                    {unverifiedEmail && (
-                        <div className="mb-6 flex items-start gap-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4">
-                            <MailWarning size={20} className="text-amber-400 mt-0.5 shrink-0" />
-                            <div>
-                                <p className="text-amber-300 text-xs font-bold mb-1">Please verify your email before logging in.</p>
-                                <p className="text-amber-400/80 text-xs leading-relaxed mb-3">
-                                    We sent a verification link to <span className="font-semibold text-white">{unverifiedEmail}</span>.
-                                </p>
-
-                                <button
-                                    type="button"
-                                    onClick={handleResend}
-                                    disabled={resending}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 rounded-lg text-xs font-bold transition cursor-pointer disabled:opacity-50"
-                                >
-                                    <RefreshCw size={12} className={resending ? "animate-spin" : ""} />
-                                    <span>{resending ? "Resending Link..." : "Resend Verification Link"}</span>
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {resendMessage && (
-                        <div className="mb-4 bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-3 text-xs text-cyan-300">
-                            {resendMessage}
-                        </div>
-                    )}
 
                     {/* Generic error */}
                     {error && (
