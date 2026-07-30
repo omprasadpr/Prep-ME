@@ -169,7 +169,6 @@ function Register() {
                                 </Link>
                             </p>
                         </>
-                    )}
                 </div>
                 <p className="text-center text-[10px] text-slate-700 mt-5 font-medium">🔒 Secure JWT Email Verification</p>
             </div>
