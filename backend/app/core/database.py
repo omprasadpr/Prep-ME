@@ -26,9 +26,18 @@ SessionLocal = sessionmaker(
 class Base(DeclarativeBase):
     pass
 
+
+def ensure_tables_created():
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"Warning: Table creation failed: {e}")
+
+
 def get_db():
+    ensure_tables_created()
     db = SessionLocal()
     try:
         yield db
     finally:
-        db.close()
+        db.close()
