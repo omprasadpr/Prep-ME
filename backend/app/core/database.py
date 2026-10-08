@@ -31,29 +31,30 @@ engine, SessionLocal = create_db_engine_and_session(primary_url)
 fallback_engine, FallbackSession = create_db_engine_and_session(fallback_url)
 
 
-def ensure_tables_created(target_engine):
-    try:
-        Base.metadata.create_all(bind=target_engine)
-    except Exception as e:
-        print(f"Warning: Table creation failed on target engine: {e}")
-
-
 def get_db():
+    # Attempt Primary DB
     try:
-        ensure_tables_created(engine)
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        Base.metadata.create_all(bind=engine)
         db = SessionLocal()
-        # Verify connection with quick ping
-        db.execute(text("SELECT 1"))
         try:
             yield db
+            return
         finally:
             db.close()
-    except Exception as e:
-        print(f"[DB WARNING] Primary DB failed ({e}). Falling back to SQLite.")
-        ensure_tables_created(fallback_engine)
-        fallback_db = FallbackSession()
-        try:
-            yield fallback_db
-        finally:
-            fallback_db.close()
+    except Exception as primary_exc:
+        print(f"[DB WARNING] Primary DB unreachable ({primary_exc}). Falling back to SQLite.")
+
+    # Fallback to local SQLite database
+    try:
+        Base.metadata.create_all(bind=fallback_engine)
+    except Exception as fallback_exc:
+        print(f"[DB WARNING] Fallback table creation warning: {fallback_exc}")
+
+    fallback_db = FallbackSession()
+    try:
+        yield fallback_db
+    finally:
+        fallback_db.close()
 
