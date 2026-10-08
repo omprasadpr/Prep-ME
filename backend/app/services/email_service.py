@@ -1,3 +1,4 @@
+# pyrefly: ignore [missing-import]
 import resend
 from app.core.config import settings
 

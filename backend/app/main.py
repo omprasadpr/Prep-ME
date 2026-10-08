@@ -49,7 +49,10 @@ if google_client_id and google_client_secret:
     )
 
 # Create database tables
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Warning: Could not create DB tables on startup: {e}")
 
 app = FastAPI(
     title="AI Interview Analyzer API"
@@ -96,7 +99,15 @@ app.include_router(dashboard_router)
 @app.get("/")
 def root():
     return {
+        "status": "ok",
         "message": "AI Interview Analyzer API is running."
+    }
+
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "ok"
     }
 
 

@@ -1,3 +1,4 @@
+# pyrefly: ignore [missing-import]
 from pydantic import BaseModel, EmailStr
 
 
@@ -10,4 +11,4 @@ class UserResponse(BaseModel):
 
     model_config = {
         "from_attributes": True
-    }
+    }
